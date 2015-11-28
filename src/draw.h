@@ -36,7 +36,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
 	
 	//Draws score text
-	updateScore(ctx, 54128);  
+	updateScore(ctx, 123456789);  
 }
 
 char *itoa(int num){
@@ -101,8 +101,8 @@ static void deinit(void) {
   window_destroy(s_main_window);
 }
 
-int main(void) {
+/*int main(void) {
   init();
   app_event_loop();
   deinit();
-}
+}*/
