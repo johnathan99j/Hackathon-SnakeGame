@@ -1,0 +1,19 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "ciomenas@icloud.com",
+    "longName": "snake_test",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "snake_test",
+    "uuid": "319f08b2-e22d-4873-92a9-a74c051b63be",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
