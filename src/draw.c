@@ -36,7 +36,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
 	
 	//Draws score text
-	updateScore(ctx, 123456789);  
+	updateScore(ctx, 54128);  
 }
 
 char *itoa(int num){
