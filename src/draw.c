@@ -1,7 +1,5 @@
-#include "draw.h"
-
 /*
- * main.c
+ * draw.c
  * Creates a Window, Layer and assigns an `update_proc` to draw 
  * the 'P' in the Pebble logo.
  */
@@ -29,14 +27,19 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   
   graphics_context_set_stroke_color(ctx, GColorBlack);
   //graphics_draw_pixel(ctx, GPoint(143, 167));
-  graphics_fill_rect(ctx, GRect(35, 35, 6, 6), 0, GColorBlack);
-  graphics_fill_rect(ctx, GRect(35+6+1, 35, 6, 6), 0, GColorBlack);
-  
+  /*
   graphics_fill_rect(ctx, GRect(6-6, 6-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(144-6, 6-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(6-6, 168-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(144-6, 168-6, 6, 6), 0, GColorBlack);
-  
+  */
+  //x,y,width,height
+  graphics_draw_rect(ctx, GRect(1, 22, 141, 144));    //TL
+  graphics_draw_rect(ctx, GRect(2, 21, 139, 144));    //TL
+  //graphics_draw_rect(ctx, GRect(2, 2, 144, 22));    //TL
+  //graphics_draw_rect(ctx, GRect(138, 0, 6, 41));  //TR
+  //graphics_fill_rect(ctx, GRect(0, 35, 6, 6), 0, GColorBlack);  //BL
+  //graphics_fill_rect(ctx, GRect(138, 35, 6, 6), 0, GColorBlack);//BR 
 }
 
 static void main_window_load(Window *window) {
