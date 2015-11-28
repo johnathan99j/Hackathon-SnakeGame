@@ -100,9 +100,3 @@ static void deinit(void) {
   // Destroy main Window
   window_destroy(s_main_window);
 }
-
-/*int main(void) {
-  init();
-  app_event_loop();
-  deinit();
-}*/
