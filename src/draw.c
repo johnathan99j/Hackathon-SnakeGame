@@ -26,27 +26,32 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   //graphics_fill_rect(ctx, GRect(32, 40, 5, 100), 0, GCornerNone);
   
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  //graphics_draw_pixel(ctx, GPoint(143, 167));
+  
+	
   /*
   graphics_fill_rect(ctx, GRect(6-6, 6-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(144-6, 6-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(6-6, 168-6, 6, 6), 0, GColorBlack);
   graphics_fill_rect(ctx, GRect(144-6, 168-6, 6, 6), 0, GColorBlack);
   */
+	
   //x,y,width,height
-  graphics_draw_rect(ctx, GRect(1, 22, 142, 144));    //TL
-  graphics_draw_rect(ctx, GRect(2, 21, 140, 144));    //TL
-  //graphics_draw_rect(ctx, GRect(2, 2, 144, 22));    //TL
-  //graphics_draw_rect(ctx, GRect(138, 0, 6, 41));  //TR
-  //graphics_fill_rect(ctx, GRect(0, 35, 6, 6), 0, GColorBlack);  //BL
-  //graphics_fill_rect(ctx, GRect(138, 35, 6, 6), 0, GColorBlack);//BR 
   
+	//Draws border
+  graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
+  graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
+	 
+  //Draws debug grid
   int grid[24][24];
   for(int row = 24; row < 160; row+=4+1) {
     for(int col = 5; col < 137; col+=4+1) {
       graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
     }
   }
+	
+	//Draws score text
+  graphics_context_set_text_color(ctx, GColorBlack);
+  graphics_draw_text(ctx, "Score: 1025", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
   
 }
 
