@@ -1,38 +1,66 @@
 #include <pebble.h>
 
-Window *window;
-TextLayer *text_layer;
+static Window *s_main_window;
+static TextLayer *s_output_layer;
 
-void handle_init(void) {
-	// Create a window and text layer
-	window = window_create();
-	text_layer = text_layer_create(GRect(0, 0, 144, 154));
-	
-	// Set the text, font, and text alignment
-	text_layer_set_text(text_layer, "Hi, I'm a Pebble!");
-	text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-	text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-	
-	// Add the text layer to the window
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(text_layer));
-
-	// Push the window
-	window_stack_push(window, true);
-	
-	// App Logging!
-	APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed a window!");
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Up pressed!");
+  window_set_background_color(s_main_window, GColorBlack);
 }
 
-void handle_deinit(void) {
-	// Destroy the text layer
-	text_layer_destroy(text_layer);
-	
-	// Destroy the window
-	window_destroy(window);
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Select pressed!");
+
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Down pressed!");
+  window_set_background_color(s_main_window, GColorWhite);
+  
+}
+
+static void click_config_provider(void *context) {
+  // Register the ClickHandlers
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+}
+
+static void main_window_load(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  GRect window_bounds = layer_get_bounds(window_layer);
+
+  // Create output TextLayer
+  s_output_layer = text_layer_create(GRect(5, 0, window_bounds.size.w - 5, window_bounds.size.h));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  text_layer_set_text(s_output_layer, "No button pressed yet.");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));
+}
+
+static void main_window_unload(Window *window) {
+  // Destroy output TextLayer
+  text_layer_destroy(s_output_layer);
+}
+
+static void init() {
+  // Create main Window
+  s_main_window = window_create();
+  window_set_window_handlers(s_main_window, (WindowHandlers) {
+    .load = main_window_load,
+    .unload = main_window_unload
+  });
+  window_set_click_config_provider(s_main_window, click_config_provider);
+  window_stack_push(s_main_window, true);
+}
+
+static void deinit() {
+  // Destroy main Window
+  window_destroy(s_main_window);
 }
 
 int main(void) {
-	handle_init();
-	app_event_loop();
-	handle_deinit();
+  init();
+  app_event_loop();
+  deinit();
 }
