@@ -5,35 +5,21 @@
  */
 
 #include <pebble.h>
+#include <stdio.h>
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
+
+void updateScore(GContext *ctx, int score);
 
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
-
-  // Draw the 'loop' of the 'P'
-  //graphics_context_set_fill_color(ctx, GColorBlack);
-  //graphics_fill_rect(ctx, center, 40);
-  //graphics_context_set_fill_color(ctx, GColorWhite);
-  //graphics_fill_rect(ctx, center, 35);
-
-  // Draw the 'stalk'
-  //graphics_context_set_fill_color(ctx, GColorBlack);
-  //graphics_fill_rect(ctx, GRect(32, 40, 5, 100), 0, GCornerNone);
   
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  
-	
-  /*
-  graphics_fill_rect(ctx, GRect(6-6, 6-6, 6, 6), 0, GColorBlack);
-  graphics_fill_rect(ctx, GRect(144-6, 6-6, 6, 6), 0, GColorBlack);
-  graphics_fill_rect(ctx, GRect(6-6, 168-6, 6, 6), 0, GColorBlack);
-  graphics_fill_rect(ctx, GRect(144-6, 168-6, 6, 6), 0, GColorBlack);
-  */
+	graphics_context_set_text_color(ctx, GColorBlack);  
 	
   //x,y,width,height
   
@@ -50,9 +36,36 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
 	
 	//Draws score text
-  graphics_context_set_text_color(ctx, GColorBlack);
-  graphics_draw_text(ctx, "Score: 1025", fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
-  
+	updateScore(ctx, 123456789);  
+}
+
+char *itoa(int num){
+	static char buff[20] = {};
+	int i = 0, temp_num = num, length = 0;
+	char *string = buff;
+	if(num >= 0) {
+		while(temp_num) {
+			temp_num /= 10;
+			length++;
+		}
+		for(i = 0; i < length; i++) {
+			buff[(length-1)-i] = '0' + (num % 10);
+			num /= 10;
+		}
+		buff[i] = '\0';
+	}
+	else
+	return "Unsupported Number";
+	return string;
+}
+
+void updateScore(GContext *ctx, int scoreInt){
+	char scoreStr[32];
+	char Int2Str[20];
+	strcpy(Int2Str,itoa(scoreInt));
+	strcpy(scoreStr,"Score: ");
+	strcat(scoreStr, Int2Str);
+	graphics_draw_text(ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
 static void main_window_load(Window *window) {
