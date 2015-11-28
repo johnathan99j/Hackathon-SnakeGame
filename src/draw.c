@@ -40,6 +40,15 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   //graphics_draw_rect(ctx, GRect(138, 0, 6, 41));  //TR
   //graphics_fill_rect(ctx, GRect(0, 35, 6, 6), 0, GColorBlack);  //BL
   //graphics_fill_rect(ctx, GRect(138, 35, 6, 6), 0, GColorBlack);//BR 
+  
+  int grid[24][24];
+  for(int row = 24; row < 160; row+=4+1) {
+    for(int col = 5; col < 137; col+=4+1) {
+      
+      graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+    }
+  }
+  
 }
 
 static void main_window_load(Window *window) {

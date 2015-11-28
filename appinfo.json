@@ -7,14 +7,7 @@
     "longName": "Snake Game",
     "projectType": "native",
     "resources": {
-        "media": [
-            {
-                "file": "images/logo.png",
-                "menuIcon": true,
-                "name": "IMAGE_LOGO",
-                "type": "png"
-            }
-        ]
+        "media": []
     },
     "sdkVersion": "2",
     "shortName": "Snake",
