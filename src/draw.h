@@ -13,20 +13,9 @@ GContext *G_ctx;
 int G_P = 0;
 int G_LastX, G_LastY = 0;
 
-int G_Score = 0;
-
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 static TextLayer *s_output_layer;
-
-struct snake{
-  int life;
-  int size;
-  int score;
-  int x;
-  int y;
-  int dir;
-};
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -35,11 +24,38 @@ void rndPosition(int *x, int *y);
 int random(int min, int max);
 void drawFruit();
 void reset();
-void create_snake(int lif, int siz, int xpos, int ypos, int sdir);
-void move_snake(struct snake *s,int dir);
-
+static void updateGame(Layer *layer, GContext *ctx);
+static void timer_handler(void *context);
 
 short state[ROW][COL];
+
+int ii = 0;
+int jj = 0;
+
+static void updateGame(Layer *layer, GContext *ctx) {
+  //game
+  
+  GRect bounds = layer_get_bounds(layer);
+	
+	graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_context_set_text_color(ctx, GColorBlack);
+  
+  //Draws border
+  graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
+  graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
+	
+	G_ctx = ctx;
+	
+	//Draws score text
+	updateScore(0);
+	
+  if(jj == 27) {
+    ii++;
+    jj = 0;
+  }
+  set_draw(ii,jj,1);
+  jj++;
+}
 
 /* 
 		STATE
@@ -47,8 +63,6 @@ short state[ROW][COL];
     1 - graphics_fill_rect
     2 - graphics_draw_circle
 */
-
-
 
 void reset() {
   for (short i = 0; i < ROW; i++) {
@@ -137,39 +151,10 @@ void drawFruit(){
 	
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(this_layer);
-	
-	graphics_context_set_stroke_color(ctx, GColorBlack);
-	graphics_context_set_text_color(ctx, GColorBlack);  
-	
-	G_ctx = ctx;
-	
-	//Draws score text
-	
-	updateScore(G_Score);
-	
-	//This draws new fruit with each canvas re-draw, only needed when canvas is initially drawn
-	//otherwise, the function should only be called once the snake collides w/ the snake
-	//hope this helps lool
-	
-	drawFruit();
-	
-	//create_snake(3, 4, random(0,120), random(0,140), 0);
-	
-  // Get the center of the screen (non full-screen)
-  GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
-  //x,y,width,height
+
+
   
-	//Draws border
-  graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
-  graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
-	
-	while (G_P == 0){
-		create_snake(3, 4, random(0,120), random(0,140), 0);
-	}
-	
-}
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 char *itoa(int num){
 	static char buff[20] = {};
@@ -248,8 +233,9 @@ static void main_window_load(Window *window) {
 
   // Set the update_proc
 	if(G_LastX==0){
-  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+    //canvas_update_proc
 	}
+  
 }
 
 static void main_window_unload(Window *window) {
@@ -258,104 +244,32 @@ static void main_window_unload(Window *window) {
 	text_layer_destroy(s_output_layer);
 }
 
-static void init(void) {
+static void timer_handler(void *context) {
+   layer_mark_dirty(s_canvas_layer);
+   app_timer_register(200, timer_handler, NULL);
+}
+
+static void init() {
   // Create main Window
   s_main_window = window_create();
   window_set_fullscreen(s_main_window, true);
+  window_set_click_config_provider(s_main_window, click_config_provider);
+  s_canvas_layer = layer_create(GRect(0,0,144,168));
+  window_stack_push(s_main_window, false);
+  Layer* motherLayer = window_get_root_layer(s_main_window);
+  layer_add_child(motherLayer, s_canvas_layer);
+
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
     .unload = main_window_unload,
   });
-	
-	window_set_click_config_provider(s_main_window, click_config_provider);
-
-  window_stack_push(s_main_window, true);
+  
+  layer_set_update_proc(s_canvas_layer, updateGame);
+  app_timer_register(200, timer_handler, NULL);
+  
 }
 
 static void deinit(void) {
   // Destroy main Window
   window_destroy(s_main_window);
 }
-
-
-void move_snake(struct snake *s,int dir){
-	int i=0;
-	for(i=0;i<s->size;++i){
-		
-	}
-}
-
-void create_snake(int lif, int siz, int xpos, int ypos, int sdir){
-	struct snake *create_snake = (struct snake *) malloc (sizeof(struct snake));
-	
-  if( lif == 0 || siz == 0 ){
-    //text_layer_set_text(s_output_layer, "GAMEOVER");
-  }else{
-    create_snake->life = lif;
-    create_snake->size = siz;
-    create_snake->score = 0;
-    create_snake->x = xpos;
-    create_snake->y = ypos;
-    create_snake->dir = sdir;
-    /*
-		int i =0;
-		
-		for(i=0;i<create_snake->size*4;i+=4){
-			graphics_draw_rect(G_ctx, GRect(2+create_snake->x+i,21+create_snake->y, 5, 5));
-		}
-		*/
-	//state[create_snake->x][create_snake->y] = 1;
-				/*int i=0;
-				for(i=0;i>create_snake->size;++i){
-					state[create_snake->x+i][create_snake->y] = 1;
-					printf("i:%d",i);
-				}
-				draw();
-			*/
-		}
-		
-    if( create_snake->x > 0 && create_snake->x < 27 ){
-      if( create_snake->y > 0 && create_snake->y < 26 ){
-        
-				
-        
-      }
-    }
-    /*
-    if( create_snake->dir >= 0 ){
-      while(1){
-        if( create_snake->dir == 1 ){
-          //state[create_snake->x+1][create_snake->y];
-          create_snake->x+=1;
-         // graphics_fill_rect(G_ctx, GRect(create_snake->x, create_snake->y, 4, 4), 0, GColorBlack);
-        }
-      }
-      
-    }*/
-		
-  }
-
-
-/*
-int *change_snake_dir(int bpress, int cdir){
-  struct snake * curr_snake = (struct snake *) malloc (sizeof(struct snake));
-  
-  if ( *bpress == NULL ){    //ERROR
-    return -1;
-  }else if( bpress == 1 ){ //left (UP BUTTON)
-    if( cdir == 0 ){
-      
-      curr_snake->x -= state[][];
-      cdir = 3;
-      return cdir;
-      
-    }else if () {
-      
-    }
-  }else if( bpress == 2 ){ //right (DOWN BUTTON)
-    
-  }else{    //ERROR
-    return -1;
-  }
-}
-*/

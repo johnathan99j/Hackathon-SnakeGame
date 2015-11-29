@@ -2,13 +2,12 @@
 #include "draw.h"
 
 int main(void) {
-	init();
+    init();
+    app_event_loop();
+    deinit();
   
-	
-	app_event_loop();
 	
 
 	
-	deinit();
 }
 
