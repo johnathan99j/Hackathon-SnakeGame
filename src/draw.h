@@ -28,6 +28,24 @@ void reset() {
   }
 }
 
+void draw(int R, int C, int S) {
+  state[R][C] = S;
+  
+  int r = 0;
+  for(int row = 24; row < 160; row+=4+1) {
+    int c = 0;
+    for(int col = 5; col < 137; col+=4+1) {
+      if (state[r][c] == 1) {
+        graphics_fill_rect(G_ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+      } else if (state[r][c] == 2) {
+        graphics_draw_circle(G_ctx, GPoint(col+2, row+1), 2);
+      } 
+      c++;
+    }
+      r++;
+  }
+}
+
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
@@ -51,24 +69,6 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
-	 
-  //Draws grid
-  
-  
-  
-  int r = 0;
-  for(int row = 24; row < 160; row+=4+1) {
-    int c = 0;
-    for(int col = 5; col < 137; col+=4+1) {
-      if (state[r][c] == 1) {
-        graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
-      } else if (state[r][c] == 2) {
-        graphics_draw_circle(ctx, GPoint(col+2, row+1), 2);
-      } 
-      c++;
-    }
-      r++;
-  }
 	
 	//Draws score text
 	updateScore(123456789);  
