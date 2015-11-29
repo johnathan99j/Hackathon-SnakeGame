@@ -13,6 +13,13 @@ GContext *G_ctx;
 
 short state[ROW][COL];
 
+/* 
+		STATE
+    0 - NULL
+    1 - graphics_fill_rect
+    2 - graphics_draw_circle
+*/
+
 void reset() {
   for (short i = 0; i < ROW; i++) {
     for (short j = 0; j < COL; j++) {
@@ -26,11 +33,13 @@ static Layer *s_canvas_layer;
 
 void updateScore(int score);
 
+
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 	
 	G_ctx = ctx;
 
+	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
   
@@ -45,11 +54,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	 
   //Draws grid
   
-  /* STATE
-    0 - NULL
-    1 - graphics_fill_rect
-    2 - graphics_draw_circle
-  */
+  
   
   int r = 0;
   for(int row = 24; row < 160; row+=4+1) {
@@ -97,6 +102,8 @@ void updateScore(int scoreInt){
 	strcat(scoreStr, Int2Str);
 	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
+
+
 
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
