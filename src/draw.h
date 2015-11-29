@@ -6,10 +6,21 @@
 
 #include <pebble.h>
 #include <stdio.h>
+
 #define ROW 28
 #define COL 27
 
 GContext *G_ctx;
+
+static Window *s_main_window;
+static Layer *s_canvas_layer;
+
+void draw(int R, int C, int S);
+void updateScore(int score);
+void rndPosition(int *x, int *y);
+int random(int min, int max);
+void drawFruit();
+void reset();
 
 short state[ROW][COL];
 
@@ -46,17 +57,46 @@ void draw(int R, int C, int S) {
   }
 }
 
-static Window *s_main_window;
-static Layer *s_canvas_layer;
 
-void updateScore(int score);
+int random(int min, int max){
+    int range, result, cutoff;
+ 
+    if (min >= max)
+        return min;
+    range = max-min+1;
+    cutoff = (RAND_MAX / range) * range;
+    do {
+        result = rand();
+    } while (result >= cutoff);
+    return result % range + min;
+}
 
+void rndPosition(int *x, int *y){
+	int NewX, NewY =0;
+	
+	time_t t;
+	srand((unsigned) time(&t));
+  
+  NewX = random(0,27);
+	NewY = random(0,27);
+	
+	*x= NewX;
+	*y= NewY;
+}
+
+void drawFruit(){
+	int x,y =0;
+	rndPosition(&x, &y);
+	
+	draw(x,y,2);
+}
 
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 	
 	G_ctx = ctx;
 
+	drawFruit();
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
@@ -71,7 +111,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	
 	//Draws score text
-	updateScore(123456789);  
+	updateScore(29112015); 
 }
 
 char *itoa(int num){
@@ -102,8 +142,6 @@ void updateScore(int scoreInt){
 	strcat(scoreStr, Int2Str);
 	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
-
-
 
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);

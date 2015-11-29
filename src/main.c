@@ -4,10 +4,11 @@
 
 int main(void) {
   init();
-	app_event_loop();  
-  
 	
-	int x,y =0;
-	rndPosition(&x,&y);
+	
+	app_event_loop();
+	
+	
 	deinit();
 }
+
