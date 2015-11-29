@@ -5,21 +5,25 @@
  */
 
 #include <pebble.h>
-#include <stdio.h>
 
 #define ROW 28
 #define COL 27
 
 GContext *G_ctx;
+int G_P = 0;
+int G_LastX, G_LastY = 0;
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
+static TextLayer *s_output_layer;
 
-void draw(int R, int C, int S);
+void set_draw(int R, int C, int S);
+void draw();
 void updateScore(int score);
 void rndPosition(int *x, int *y);
 int random(int min, int max);
 void drawFruit();
+void reset();
 
 short state[ROW][COL];
 
@@ -38,7 +42,7 @@ void reset() {
   }
 }
 
-void draw(int R, int C, int S) {
+void set_draw(int R, int C, int S) {
   state[R][C] = S;
   
   int r = 0;
@@ -56,73 +60,94 @@ void draw(int R, int C, int S) {
   }
 }
 
+void draw() {
+  
+  int r = 0;
+  for(int row = 24; row < 160; row+=4+1) {
+    int c = 0;
+    for(int col = 5; col < 137; col+=4+1) {
+      if (state[r][c] == 1) {
+        graphics_fill_rect(G_ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+      } else if (state[r][c] == 2) {
+        graphics_draw_circle(G_ctx, GPoint(col+2, row+1), 2);
+      } 
+      c++;
+    }
+      r++;
+  }
+}
 
-int random(int min, int max)
-{
+
+int random(int min, int max){
     int range, result, cutoff;
  
     if (min >= max)
-        return min; // only one outcome possible, or invalid parameters
+        return min;
     range = max-min+1;
     cutoff = (RAND_MAX / range) * range;
- 
-    // Rejection method, to be statistically unbiased.
     do {
         result = rand();
     } while (result >= cutoff);
- 
     return result % range + min;
 }
 
 void rndPosition(int *x, int *y){
-	
 	int NewX, NewY =0;
 	
 	time_t t;
 	srand((unsigned) time(&t));
   
-  /* Intializes random number generator */
-  NewX = random(0,27);
-	NewY = random(0,27);
-	//printf("X:%d Y:%d\n",NewX,NewY);
+  NewX = random(1,27);
+	NewY = random(1,27);
 	
 	*x= NewX;
 	*y= NewY;
-	
 }
 
 void drawFruit(){
-	int x,y =0;
-	rndPosition(&x, &y);
 	
-	printf("%d %d",x,y);
-	
-	draw(x,y,2);
-}
+	if(G_LastX==0){
+		int x,y =0;
+		rndPosition(&x, &y);
 
+		G_LastX=x;
+		G_LastY=y;
+
+		set_draw(x,y,2);
+	}else{
+		set_draw(G_LastX, G_LastY, 2);
+	}
+	
+	
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 	
+	graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_context_set_text_color(ctx, GColorBlack);  
+	
 	G_ctx = ctx;
-
+	
+	//Draws score text
+	updateScore(0);
+	
+	//This draws new fruit with each canvas re-draw, only needed when canvas is initially drawn
+	//otherwise, the function should only be called once the snake collides w/ the snake
+	//hope this helps lool
+	
 	drawFruit();
+	
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
-  
-  graphics_context_set_stroke_color(ctx, GColorBlack);
-	graphics_context_set_text_color(ctx, GColorBlack);  
-	
   //x,y,width,height
   
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
-	
-	//Draws score text
-	updateScore(123456789); 
 }
-
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 char *itoa(int num){
 	static char buff[20] = {};
 	int i = 0, temp_num = num, length = 0;
@@ -146,29 +171,68 @@ char *itoa(int num){
 void updateScore(int scoreInt){
 	char scoreStr[32];
 	char Int2Str[20];
-	strcpy(Int2Str,itoa(scoreInt));
+	if(scoreInt==0){
+		strcpy(Int2Str,"0");
+	}else{
+		strcpy(Int2Str,itoa(scoreInt));
+	}
 	strcpy(scoreStr,"Score: ");
 	strcat(scoreStr, Int2Str);
 	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Tom's 1");
+}
 
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if(G_P==0){
+		text_layer_set_text(s_output_layer, "PAUSE");
+		G_P = 1;
+	}else{
+		text_layer_set_text(s_output_layer, "");
+		G_P = 0;
+	}
+	
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Tom's 2");
+}
+
+static void click_config_provider(void *context) {
+  // Register the ClickHandlers
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+}
 
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect window_bounds = layer_get_bounds(window_layer);
-
+	
+// Create output TextLayer
+  s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_text(s_output_layer, "");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+	//layer_remove_from_parent(text_layer_get_layer(s_output_layer));		//Removes pause text
+	
   // Create Layer
   s_canvas_layer = layer_create(GRect(0, 0, window_bounds.size.w, window_bounds.size.h));
   layer_add_child(window_layer, s_canvas_layer);
 
   // Set the update_proc
+	if(G_LastX==0){
   layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+	}
 }
 
 static void main_window_unload(Window *window) {
   // Destroy Layer
   layer_destroy(s_canvas_layer);
+	text_layer_destroy(s_output_layer);
 }
 
 static void init(void) {
@@ -179,6 +243,9 @@ static void init(void) {
     .load = main_window_load,
     .unload = main_window_unload,
   });
+	
+	window_set_click_config_provider(s_main_window, click_config_provider);
+
   window_stack_push(s_main_window, true);
 }
 
