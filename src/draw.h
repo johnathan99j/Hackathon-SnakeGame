@@ -24,6 +24,8 @@ void rndPosition(int *x, int *y);
 int random(int min, int max);
 void drawFruit();
 void reset();
+struct snake *create_snake(int lif, int siz, int xpos, int ypos, int sdir);
+
 
 short state[ROW][COL];
 
@@ -33,6 +35,15 @@ short state[ROW][COL];
     1 - graphics_fill_rect
     2 - graphics_draw_circle
 */
+
+struct snake{
+  int life;
+  int size;
+  int score;
+  int x;
+  int y;
+  int dir;
+};
 
 void reset() {
   for (short i = 0; i < ROW; i++) {
@@ -253,3 +264,61 @@ static void deinit(void) {
   // Destroy main Window
   window_destroy(s_main_window);
 }
+
+
+struct snake *create_snake(int lif, int siz, int xpos, int ypos, int sdir){
+	struct snake *create_snake = (struct snake *) malloc (sizeof(struct snake));
+	
+  if( lif == 0 || siz == 0 ){
+    //death
+  }else{
+    create_snake->life = (lif);
+    create_snake->size = siz;
+    create_snake->score = 0;
+    create_snake->x = xpos;
+    create_snake->y = ypos;
+    create_snake->dir = sdir;
+    
+    if( create_snake->x > 0 && create_snake->x < 27 ){
+      if( create_snake->y > 0 && create_snake->y < 26 ){
+        graphics_fill_rect(G_ctx, GRect(create_snake->x,create_snake->y, 4, 4), 0, GColorBlack);
+        //state[create_snake->x][create_snake->y];
+      }
+    }
+    
+    if( create_snake->dir >= 0 ){
+      while( 1 ){
+        if( create_snake->dir == 1 ){
+          //state[create_snake->x+1][create_snake->y];
+          create_snake->x+=1;
+          graphics_fill_rect(G_ctx, GRect(create_snake->x, create_snake->y, 4, 4), 0, GColorBlack);
+        }
+      }
+      
+    }
+  }
+}
+
+/*
+int *change_snake_dir(int bpress, int cdir){
+  struct snake * curr_snake = (struct snake *) malloc (sizeof(struct snake));
+  
+  if ( *bpress == NULL ){    //ERROR
+    return -1;
+  }else if( bpress == 1 ){ //left (UP BUTTON)
+    if( cdir == 0 ){
+      
+      curr_snake->x -= state[][];
+      cdir = 3;
+      return cdir;
+      
+    }else if () {
+      
+    }
+  }else if( bpress == 2 ){ //right (DOWN BUTTON)
+    
+  }else{    //ERROR
+    return -1;
+  }
+}
+*/
