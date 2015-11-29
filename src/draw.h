@@ -5,15 +5,17 @@
  */
 
 #include <pebble.h>
-#include <stdio.h>
 
 #define ROW 28
 #define COL 27
 
 GContext *G_ctx;
+int G_P = 0;
+int G_LastX, G_LastY = 0;
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
+static TextLayer *s_output_layer;
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -95,20 +97,30 @@ void rndPosition(int *x, int *y){
 	time_t t;
 	srand((unsigned) time(&t));
   
-  NewX = random(0,27);
-	NewY = random(0,27);
+  NewX = random(1,27);
+	NewY = random(1,27);
 	
 	*x= NewX;
 	*y= NewY;
 }
 
 void drawFruit(){
-	int x,y =0;
-	rndPosition(&x, &y);
 	
-	set_draw(x,y,2);
-}
+	if(G_LastX==0){
+		int x,y =0;
+		rndPosition(&x, &y);
 
+		G_LastX=x;
+		G_LastY=y;
+
+		set_draw(x,y,2);
+	}else{
+		set_draw(G_LastX, G_LastY, 2);
+	}
+	
+	
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 	
@@ -117,9 +129,15 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	
 	G_ctx = ctx;
 	
+	//Draws score text
 	updateScore(0);
 	
+	//This draws new fruit with each canvas re-draw, only needed when canvas is initially drawn
+	//otherwise, the function should only be called once the snake collides w/ the snake
+	//hope this helps lool
+	
 	drawFruit();
+	
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
@@ -128,11 +146,8 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
-	
-	//Draws score text
-	 
 }
-
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 char *itoa(int num){
 	static char buff[20] = {};
 	int i = 0, temp_num = num, length = 0;
@@ -166,21 +181,58 @@ void updateScore(int scoreInt){
 	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Tom's 1");
+}
+
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if(G_P==0){
+		text_layer_set_text(s_output_layer, "PAUSE");
+		G_P = 1;
+	}else{
+		text_layer_set_text(s_output_layer, "");
+		G_P = 0;
+	}
+	
+}
+
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  text_layer_set_text(s_output_layer, "Tom's 2");
+}
+
+static void click_config_provider(void *context) {
+  // Register the ClickHandlers
+  window_single_click_subscribe(BUTTON_ID_UP, up_click_handler);
+  window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, down_click_handler);
+}
+
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect window_bounds = layer_get_bounds(window_layer);
-
+	
+// Create output TextLayer
+  s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_text(s_output_layer, "");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+	//layer_remove_from_parent(text_layer_get_layer(s_output_layer));		//Removes pause text
+	
   // Create Layer
   s_canvas_layer = layer_create(GRect(0, 0, window_bounds.size.w, window_bounds.size.h));
   layer_add_child(window_layer, s_canvas_layer);
 
   // Set the update_proc
+	if(G_LastX==0){
   layer_set_update_proc(s_canvas_layer, canvas_update_proc);
+	}
 }
 
 static void main_window_unload(Window *window) {
   // Destroy Layer
   layer_destroy(s_canvas_layer);
+	text_layer_destroy(s_output_layer);
 }
 
 static void init(void) {
@@ -191,6 +243,8 @@ static void init(void) {
     .load = main_window_load,
     .unload = main_window_unload,
   });
+	
+	window_set_click_config_provider(s_main_window, click_config_provider);
 
   window_stack_push(s_main_window, true);
 }
