@@ -39,19 +39,13 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	 
-  //Draws debug grid
-
-  state[14][14] = 1;
-  state[14][15] = 1;
-  state[14][16] = 1;
-  state[20][20] = 2;
+  //Draws grid
   
   /* STATE
     0 - NULL
     1 - graphics_fill_rect
     2 - graphics_draw_circle
   */
-  
   
   int r = 0;
   for(int row = 24; row < 160; row+=4+1) {
@@ -62,8 +56,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
         graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
       } else if (state[r][c] == 2) {
         graphics_draw_circle(ctx, GPoint(col+2, row+1), 2);
-      }
-      
+      } 
       c++;
     }
       r++;
