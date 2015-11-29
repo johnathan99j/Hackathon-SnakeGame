@@ -6,6 +6,18 @@
 
 #include <pebble.h>
 #include <stdio.h>
+#define ROW 28
+#define COL 27
+
+short state[ROW][COL];
+
+void reset() {
+  for (short i = 0; i < ROW; i++) {
+    for (short j = 0; j < COL; j++) {
+      state[i][j] = 0;
+    }
+  }
+}
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
@@ -28,11 +40,33 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	 
   //Draws debug grid
-  int grid[24][24];
+
+  state[14][14] = 1;
+  state[14][15] = 1;
+  state[14][16] = 1;
+  state[20][20] = 2;
+  
+  /* STATE
+    0 - NULL
+    1 - graphics_fill_rect
+    2 - graphics_draw_circle
+  */
+  
+  
+  int r = 0;
   for(int row = 24; row < 160; row+=4+1) {
+    int c = 0;
     for(int col = 5; col < 137; col+=4+1) {
-      graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+      printf("%d %d : %d", r, c, state[r][c]);
+      if (state[r][c] == 1) {
+        graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+      } else if (state[r][c] == 2) {
+        graphics_draw_circle(ctx, GPoint(col+2, row+1), 2);
+      }
+      
+      c++;
     }
+      r++;
   }
 	
 	//Draws score text
