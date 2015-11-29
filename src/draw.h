@@ -36,6 +36,7 @@ short state[ROW][COL];
 static void updateGame(Layer *layer, GContext *ctx) {
   //game
   int i = 0;
+	int j = 0;
 	
   GRect bounds = layer_get_bounds(layer);
 	
@@ -53,14 +54,14 @@ static void updateGame(Layer *layer, GContext *ctx) {
 	
 	//Draws cube things
 	if(G_P==0){
-		if(dire==0){
+		if(dire==0 || dire==4){		//RIGHT
 			if(jj == 27) {
 				jj = 0;
 			}
 			set_draw(ii,jj,1);
 			jj++;
 			set_draw(ii-i, jj-1, 0);
-		}else if(dire==1){
+		}else if(dire==2){		//LEFT
 			if(jj == 00) {
 				jj = 27;
 			}
@@ -68,6 +69,21 @@ static void updateGame(Layer *layer, GContext *ctx) {
 
 			jj--;
 			set_draw(ii+i, jj+1, 0);
+		}else if(dire==1){	//DOWN
+			if(ii == 27) {
+				ii = 0;
+			}
+			set_draw(ii,jj,1);
+			ii++;
+			set_draw(ii-1, jj-j, 0);
+		}else if(dire ==3){		//UP
+			if(ii == 00) {
+				ii = 27;
+			}
+			set_draw(ii,jj,1);
+
+			ii--;
+			set_draw(ii+1, jj+j, 0);
 		}
 	}
 }
@@ -206,7 +222,10 @@ void updateScore(int scoreInt){
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   //text_layer_set_text(s_output_layer, "Tom's 1");
-	dire += 1;
+	dire -= 1;
+	if(dire<0){
+		dire=3;
+	}
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -223,7 +242,10 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   //text_layer_set_text(s_output_layer, "Tom's 2");
-	dire -= 1;
+	dire += 1;
+	if(dire>4){
+		dire=1;
+	}
 }
 
 static void click_config_provider(void *context) {
