@@ -55,7 +55,6 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   for(int row = 24; row < 160; row+=4+1) {
     int c = 0;
     for(int col = 5; col < 137; col+=4+1) {
-      printf("%d %d : %d", r, c, state[r][c]);
       if (state[r][c] == 1) {
         graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
       } else if (state[r][c] == 2) {
