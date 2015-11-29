@@ -15,7 +15,8 @@ GContext *G_ctx;
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
-void draw(int R, int C, int S);
+void set_draw(int R, int C, int S);
+void draw();
 void updateScore(int score);
 void rndPosition(int *x, int *y);
 int random(int min, int max);
@@ -111,16 +112,17 @@ void drawFruit(){
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
 	
+	graphics_context_set_stroke_color(ctx, GColorBlack);
+	graphics_context_set_text_color(ctx, GColorBlack);  
+	
 	G_ctx = ctx;
-
+	
+	updateScore(0);
+	
 	drawFruit();
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
-  
-  graphics_context_set_stroke_color(ctx, GColorBlack);
-	graphics_context_set_text_color(ctx, GColorBlack);  
-	
   //x,y,width,height
   
 	//Draws border
@@ -128,7 +130,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	
 	//Draws score text
-	updateScore(29112015); 
+	 
 }
 
 char *itoa(int num){
@@ -154,7 +156,11 @@ char *itoa(int num){
 void updateScore(int scoreInt){
 	char scoreStr[32];
 	char Int2Str[20];
-	strcpy(Int2Str,itoa(scoreInt));
+	if(scoreInt==0){
+		strcpy(Int2Str,"0");
+	}else{
+		strcpy(Int2Str,itoa(scoreInt));
+	}
 	strcpy(scoreStr,"Score: ");
 	strcat(scoreStr, Int2Str);
 	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
@@ -185,6 +191,7 @@ static void init(void) {
     .load = main_window_load,
     .unload = main_window_unload,
   });
+
   window_stack_push(s_main_window, true);
 }
 
