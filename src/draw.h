@@ -12,6 +12,9 @@
 GContext *G_ctx;
 int G_P = 0;
 int G_LastX, G_LastY = 0;
+int ii = 0;
+int jj = 0;
+int dire = 0;
 
 static Window *s_main_window;
 static Layer *s_canvas_layer;
@@ -26,15 +29,15 @@ void drawFruit();
 void reset();
 static void updateGame(Layer *layer, GContext *ctx);
 static void timer_handler(void *context);
+static void click_config_provider(void *context);
 
 short state[ROW][COL];
 
-int ii = 0;
-int jj = 0;
+
 
 static void updateGame(Layer *layer, GContext *ctx) {
   //game
-  
+  int i = 0;
   GRect bounds = layer_get_bounds(layer);
 	
 	graphics_context_set_stroke_color(ctx, GColorBlack);
@@ -49,12 +52,24 @@ static void updateGame(Layer *layer, GContext *ctx) {
 	//Draws score text
 	updateScore(0);
 	
-  if(jj == 27) {
-    ii++;
-    jj = 0;
-  }
-  set_draw(ii,jj,1);
-  jj++;
+	//Draws cube things
+	if(G_P==0){
+		if(dire==0){
+			if(jj == 27) {
+
+				ii++;
+
+				jj = 0;
+			}else if(jj == 27 && ii == 28){
+				ii=0;
+				jj=0;
+			}
+			set_draw(ii,jj,1);
+
+			jj++;
+			set_draw(ii-i, jj-1, 0);
+		}
+	}
 }
 
 /* 
@@ -194,9 +209,10 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if(G_P==0){
-		text_layer_set_text(s_output_layer, "PAUSE");
-		G_P = 1;
+	
+	if(G_P==0){
+			text_layer_set_text(s_output_layer, "PAUSE");
+		G_P = 1;		
 	}else{
 		text_layer_set_text(s_output_layer, "");
 		G_P = 0;
@@ -220,11 +236,7 @@ static void main_window_load(Window *window) {
   GRect window_bounds = layer_get_bounds(window_layer);
 	
 // Create output TextLayer
-  s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
-  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_text(s_output_layer, "");
-  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
-  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+  
 	//layer_remove_from_parent(text_layer_get_layer(s_output_layer));		//Removes pause text
 	
   // Create Layer
@@ -256,8 +268,17 @@ static void init() {
   window_set_click_config_provider(s_main_window, click_config_provider);
   s_canvas_layer = layer_create(GRect(0,0,144,168));
   window_stack_push(s_main_window, false);
+	
+	Layer *window_layer = window_get_root_layer(s_main_window);
+	s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_text(s_output_layer, "");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+	
   Layer* motherLayer = window_get_root_layer(s_main_window);
   layer_add_child(motherLayer, s_canvas_layer);
+
 
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
