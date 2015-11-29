@@ -7,14 +7,106 @@
 #include <pebble.h>
 #include <stdio.h>
 
+#define ROW 28
+#define COL 27
+
+GContext *G_ctx;
+
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
-void updateScore(GContext *ctx, int score);
+void draw(int R, int C, int S);
+void updateScore(int score);
+void rndPosition(int *x, int *y);
+int random(int min, int max);
+void drawFruit();
+
+short state[ROW][COL];
+
+/* 
+		STATE
+    0 - NULL
+    1 - graphics_fill_rect
+    2 - graphics_draw_circle
+*/
+
+void reset() {
+  for (short i = 0; i < ROW; i++) {
+    for (short j = 0; j < COL; j++) {
+      state[i][j] = 0;
+    }
+  }
+}
+
+void draw(int R, int C, int S) {
+  state[R][C] = S;
+  
+  int r = 0;
+  for(int row = 24; row < 160; row+=4+1) {
+    int c = 0;
+    for(int col = 5; col < 137; col+=4+1) {
+      if (state[r][c] == 1) {
+        graphics_fill_rect(G_ctx, GRect(col, row, 4, 4), 0, GColorBlack);
+      } else if (state[r][c] == 2) {
+        graphics_draw_circle(G_ctx, GPoint(col+2, row+1), 2);
+      } 
+      c++;
+    }
+      r++;
+  }
+}
+
+
+int random(int min, int max)
+{
+    int range, result, cutoff;
+ 
+    if (min >= max)
+        return min; // only one outcome possible, or invalid parameters
+    range = max-min+1;
+    cutoff = (RAND_MAX / range) * range;
+ 
+    // Rejection method, to be statistically unbiased.
+    do {
+        result = rand();
+    } while (result >= cutoff);
+ 
+    return result % range + min;
+}
+
+void rndPosition(int *x, int *y){
+	
+	int NewX, NewY =0;
+	
+	time_t t;
+	srand((unsigned) time(&t));
+  
+  /* Intializes random number generator */
+  NewX = random(0,27);
+	NewY = random(0,27);
+	//printf("X:%d Y:%d\n",NewX,NewY);
+	
+	*x= NewX;
+	*y= NewY;
+	
+}
+
+void drawFruit(){
+	int x,y =0;
+	rndPosition(&x, &y);
+	
+	printf("%d %d",x,y);
+	
+	draw(x,y,2);
+}
 
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
+	
+	G_ctx = ctx;
 
+	drawFruit();
+	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
   
@@ -26,17 +118,9 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
-	 
-  //Draws debug grid
-  int grid[24][24];
-  for(int row = 24; row < 160; row+=4+1) {
-    for(int col = 5; col < 137; col+=4+1) {
-      graphics_fill_rect(ctx, GRect(col, row, 4, 4), 0, GColorBlack);
-    }
-  }
 	
 	//Draws score text
-	updateScore(ctx, 123456789);  
+	updateScore(123456789); 
 }
 
 char *itoa(int num){
@@ -59,14 +143,16 @@ char *itoa(int num){
 	return string;
 }
 
-void updateScore(GContext *ctx, int scoreInt){
+void updateScore(int scoreInt){
 	char scoreStr[32];
 	char Int2Str[20];
 	strcpy(Int2Str,itoa(scoreInt));
 	strcpy(scoreStr,"Score: ");
 	strcat(scoreStr, Int2Str);
-	graphics_draw_text(ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
+
+
 
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
