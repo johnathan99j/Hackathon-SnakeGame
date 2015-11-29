@@ -19,6 +19,7 @@ int G_LastX, G_LastY = 0;
 int ii = 0;
 int jj = 0;
 int dire = 0;
+int G_Score = 0;
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -35,22 +36,33 @@ short state[ROW][COL];
 
 static void updateGame(Layer *layer, GContext *ctx) {
   //game
+	G_ctx = ctx;
   int i = 0;
 	int j = 0;
+	int hg = 0;
+	
 	
   GRect bounds = layer_get_bounds(layer);
 	
 	graphics_context_set_stroke_color(ctx, GColorBlack);
 	graphics_context_set_text_color(ctx, GColorBlack);
+	
   
+	
   //Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	
-	G_ctx = ctx;
+	
+	if (hg==0){
+		updateScore(0);
+		hg=1;
+	}
+	drawFruit();
 	
 	//Draws score text
-	updateScore(0);
+	
+	
 	
 	//Draws cube things
 	if(G_P==0){
@@ -87,7 +99,13 @@ static void updateGame(Layer *layer, GContext *ctx) {
 			ii--;
 			set_draw(ii+1, jj+j, 0);
 		}
-	}
+
+	}		if(G_LastX==ii && G_LastY==jj){
+			updateScore(G_Score+10);
+			G_Score+=10;
+			G_LastX=0;
+			drawFruit();
+		}
 }
 
 /* 
