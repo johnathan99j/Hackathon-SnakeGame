@@ -9,16 +9,16 @@
 #define ROW 28
 #define COL 27
 
+static Window *s_main_window;
+static Layer *s_canvas_layer;
+static TextLayer *s_output_layer;
+
 GContext *G_ctx;
 int G_P = 0;
 int G_LastX, G_LastY = 0;
 int ii = 0;
 int jj = 0;
 int dire = 0;
-
-static Window *s_main_window;
-static Layer *s_canvas_layer;
-static TextLayer *s_output_layer;
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -33,11 +33,10 @@ static void click_config_provider(void *context);
 
 short state[ROW][COL];
 
-
-
 static void updateGame(Layer *layer, GContext *ctx) {
   //game
   int i = 0;
+	
   GRect bounds = layer_get_bounds(layer);
 	
 	graphics_context_set_stroke_color(ctx, GColorBlack);
@@ -56,18 +55,19 @@ static void updateGame(Layer *layer, GContext *ctx) {
 	if(G_P==0){
 		if(dire==0){
 			if(jj == 27) {
-
-				ii++;
-
 				jj = 0;
-			}else if(jj == 27 && ii == 28){
-				ii=0;
-				jj=0;
+			}
+			set_draw(ii,jj,1);
+			jj++;
+			set_draw(ii-i, jj-1, 0);
+		}else if(dire==1){
+			if(jj == 00) {
+				jj = 27;
 			}
 			set_draw(ii,jj,1);
 
-			jj++;
-			set_draw(ii-i, jj-1, 0);
+			jj--;
+			set_draw(ii+i, jj+1, 0);
 		}
 	}
 }
@@ -205,7 +205,8 @@ void updateScore(int scoreInt){
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Tom's 1");
+  //text_layer_set_text(s_output_layer, "Tom's 1");
+	dire += 1;
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -221,7 +222,8 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Tom's 2");
+  //text_layer_set_text(s_output_layer, "Tom's 2");
+	dire -= 1;
 }
 
 static void click_config_provider(void *context) {
@@ -258,7 +260,7 @@ static void main_window_unload(Window *window) {
 
 static void timer_handler(void *context) {
    layer_mark_dirty(s_canvas_layer);
-   app_timer_register(200, timer_handler, NULL);
+   app_timer_register(150, timer_handler, NULL);
 }
 
 static void init() {
@@ -286,7 +288,7 @@ static void init() {
   });
   
   layer_set_update_proc(s_canvas_layer, updateGame);
-  app_timer_register(200, timer_handler, NULL);
+  app_timer_register(150, timer_handler, NULL);
   
 }
 
