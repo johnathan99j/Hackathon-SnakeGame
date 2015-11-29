@@ -64,13 +64,15 @@ static void updateGame(Layer *layer, GContext *ctx) {
 		}else if(dire==2){		//LEFT
 			if(jj == 00) {
 				jj = 27;
-			}
+				set_draw(ii-1,jj,1);
+				psleep(50);
+				set_draw(ii-1,jj,0);
+			}else
 			set_draw(ii,jj,1);
-
 			jj--;
 			set_draw(ii+i, jj+1, 0);
 		}else if(dire==1){	//DOWN
-			if(ii == 27) {
+			if(ii == 28) {
 				ii = 0;
 			}
 			set_draw(ii,jj,1);
@@ -78,7 +80,7 @@ static void updateGame(Layer *layer, GContext *ctx) {
 			set_draw(ii-1, jj-j, 0);
 		}else if(dire ==3){		//UP
 			if(ii == 00) {
-				ii = 27;
+				ii = 28;
 			}
 			set_draw(ii,jj,1);
 
