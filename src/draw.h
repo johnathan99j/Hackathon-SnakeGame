@@ -19,6 +19,15 @@ static Window *s_main_window;
 static Layer *s_canvas_layer;
 static TextLayer *s_output_layer;
 
+struct snake{
+  int life;
+  int size;
+  int score;
+  int x;
+  int y;
+  int dir;
+};
+
 void set_draw(int R, int C, int S);
 void draw();
 void updateScore(int score);
@@ -27,6 +36,7 @@ int random(int min, int max);
 void drawFruit();
 void reset();
 void create_snake(int lif, int siz, int xpos, int ypos, int sdir);
+void move_snake(struct snake *s,int dir);
 
 
 short state[ROW][COL];
@@ -38,14 +48,7 @@ short state[ROW][COL];
     2 - graphics_draw_circle
 */
 
-struct snake{
-  int life;
-  int size;
-  int score;
-  int x;
-  int y;
-  int dir;
-};
+
 
 void reset() {
   for (short i = 0; i < ROW; i++) {
@@ -152,7 +155,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	
 	drawFruit();
 	
-	create_snake(3, 4, random(0,120), random(0,140), 0);
+	//create_snake(3, 4, random(0,120), random(0,140), 0);
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
@@ -161,6 +164,11 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
+	
+	while (G_P == 0){
+		create_snake(3, 4, random(0,120), random(0,140), 0);
+	}
+	
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 char *itoa(int num){
@@ -270,6 +278,13 @@ static void deinit(void) {
 }
 
 
+void move_snake(struct snake *s,int dir){
+	int i=0;
+	for(i=0;i<s->size;++i){
+		
+	}
+}
+
 void create_snake(int lif, int siz, int xpos, int ypos, int sdir){
 	struct snake *create_snake = (struct snake *) malloc (sizeof(struct snake));
 	
@@ -282,24 +297,28 @@ void create_snake(int lif, int siz, int xpos, int ypos, int sdir){
     create_snake->x = xpos;
     create_snake->y = ypos;
     create_snake->dir = sdir;
-    int i =0;
+    /*
+		int i =0;
 		
 		for(i=0;i<create_snake->size*4;i+=4){
 			graphics_draw_rect(G_ctx, GRect(2+create_snake->x+i,21+create_snake->y, 5, 5));
 		}
-		
-		
-    if( create_snake->x > 0 && create_snake->x < 27 ){
-      if( create_snake->y > 0 && create_snake->y < 26 ){
-        
-				
-        //state[create_snake->x][create_snake->y] = 1;
+		*/
+	//state[create_snake->x][create_snake->y] = 1;
 				/*int i=0;
 				for(i=0;i>create_snake->size;++i){
 					state[create_snake->x+i][create_snake->y] = 1;
 					printf("i:%d",i);
 				}
-				draw();*/
+				draw();
+			*/
+		}
+		
+    if( create_snake->x > 0 && create_snake->x < 27 ){
+      if( create_snake->y > 0 && create_snake->y < 26 ){
+        
+				
+        
       }
     }
     /*
@@ -312,10 +331,10 @@ void create_snake(int lif, int siz, int xpos, int ypos, int sdir){
         }
       }
       
-    }
-		*/
+    }*/
+		
   }
-}
+
 
 /*
 int *change_snake_dir(int bpress, int cdir){
