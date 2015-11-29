@@ -13,9 +13,20 @@ GContext *G_ctx;
 int G_P = 0;
 int G_LastX, G_LastY = 0;
 
+int G_Score = 0;
+
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 static TextLayer *s_output_layer;
+
+struct snake{
+  int life;
+  int size;
+  int score;
+  int x;
+  int y;
+  int dir;
+};
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -24,6 +35,9 @@ void rndPosition(int *x, int *y);
 int random(int min, int max);
 void drawFruit();
 void reset();
+struct snake *create_snake(int lif, int siz, int xpos, int ypos, int sdir);
+void move_snake(struct snake *s,int dir);
+
 
 short state[ROW][COL];
 
@@ -33,6 +47,8 @@ short state[ROW][COL];
     1 - graphics_fill_rect
     2 - graphics_draw_circle
 */
+
+
 
 void reset() {
   for (short i = 0; i < ROW; i++) {
@@ -130,7 +146,8 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	G_ctx = ctx;
 	
 	//Draws score text
-	updateScore(0);
+	
+	updateScore(G_Score);
 	
 	//This draws new fruit with each canvas re-draw, only needed when canvas is initially drawn
 	//otherwise, the function should only be called once the snake collides w/ the snake
@@ -138,6 +155,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	
 	drawFruit();
 	
+	//create_snake(3, 4, random(0,120), random(0,140), 0);
 	
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
@@ -146,6 +164,13 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
 	//Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
+	
+	//while (G_P == 0){
+	struct snake *placeHolder = create_snake(3, 3, random(0,120), random(0,140), 0);
+	
+	//move_snake(placeHolder, 1);
+	//}
+	
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 char *itoa(int num){
@@ -253,3 +278,93 @@ static void deinit(void) {
   // Destroy main Window
   window_destroy(s_main_window);
 }
+
+
+void move_snake(struct snake *s,int dir){
+	while(1){
+		int i = 0;
+		for(i=0;i<s->size;++i){
+			state[s->x][s->y+i] = 0;
+			state[s->x][s->y+3+i] = 1;
+		}
+		draw();
+	}
+}
+
+struct snake *create_snake(int lif, int siz, int xpos, int ypos, int sdir){
+	struct snake *create_snake = (struct snake *) malloc (sizeof(struct snake));
+	
+	if(create_snake == NULL){
+		printf("malloc error snake");
+	}
+	
+  if( lif == 0 || siz == 0 ){
+    //text_layer_set_text(s_output_layer, "GAMEOVER");
+  }else{
+    create_snake->life = lif;
+    create_snake->size = siz;
+    create_snake->score = 0;
+    create_snake->x = xpos;
+    create_snake->y = ypos;
+    create_snake->dir = sdir;
+    /*
+		int i =0;
+		
+		for(i=0;i<create_snake->size*4;i+=4){
+			graphics_draw_rect(G_ctx, GRect(2+create_snake->x+i,21+create_snake->y, 5, 5));
+		}
+		*/
+	//state[create_snake->x][create_snake->y] = 1;
+				int i=0;
+				for(i=1;i<create_snake->size+1;i++){
+					state[create_snake->x+i][create_snake->y] = 1;
+					printf("i:%d",i);
+				}
+				draw();
+			}
+		
+    if( create_snake->x > 0 && create_snake->x < 27 ){
+      if( create_snake->y > 0 && create_snake->y < 26 ){
+        
+				
+        
+      }
+    }
+    /*
+    if( create_snake->dir >= 0 ){
+      while(1){
+        if( create_snake->dir == 1 ){
+          //state[create_snake->x+1][create_snake->y];
+          create_snake->x+=1;
+         // graphics_fill_rect(G_ctx, GRect(create_snake->x, create_snake->y, 4, 4), 0, GColorBlack);
+        }
+      }
+      
+    }*/
+		return create_snake;
+  }
+
+
+/*
+int *change_snake_dir(int bpress, int cdir){
+  struct snake * curr_snake = (struct snake *) malloc (sizeof(struct snake));
+  
+  if ( *bpress == NULL ){    //ERROR
+    return -1;
+  }else if( bpress == 1 ){ //left (UP BUTTON)
+    if( cdir == 0 ){
+      
+      curr_snake->x -= state[][];
+      cdir = 3;
+      return cdir;
+      
+    }else if () {
+      
+    }
+  }else if( bpress == 2 ){ //right (DOWN BUTTON)
+    
+  }else{    //ERROR
+    return -1;
+  }
+}
+*/
