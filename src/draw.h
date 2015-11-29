@@ -9,13 +9,17 @@
 #define ROW 28
 #define COL 27
 
-GContext *G_ctx;
-int G_P = 0;
-int G_LastX, G_LastY = 0;
-
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 static TextLayer *s_output_layer;
+
+GContext *G_ctx;
+int G_P = 0;
+int G_LastX, G_LastY = 0;
+int ii = 0;
+int jj = 0;
+int dire = 0;
+int G_Score = 0;
 
 void set_draw(int R, int C, int S);
 void draw();
@@ -26,35 +30,82 @@ void drawFruit();
 void reset();
 static void updateGame(Layer *layer, GContext *ctx);
 static void timer_handler(void *context);
+static void click_config_provider(void *context);
 
 short state[ROW][COL];
 
-int ii = 0;
-int jj = 0;
-
 static void updateGame(Layer *layer, GContext *ctx) {
   //game
-  
+	G_ctx = ctx;
+  int i = 0;
+	int j = 0;
+	int hg = 0;
+	
+	
   GRect bounds = layer_get_bounds(layer);
 	
 	graphics_context_set_stroke_color(ctx, GColorBlack);
 	graphics_context_set_text_color(ctx, GColorBlack);
+	
   
+	
   //Draws border
   graphics_draw_rect(ctx, GRect(1, 22, 142, 144));
   graphics_draw_rect(ctx, GRect(2, 21, 140, 144));
 	
-	G_ctx = ctx;
+	
+	if (hg==0){
+		updateScore(0);
+		hg=1;
+	}
+	drawFruit();
 	
 	//Draws score text
-	updateScore(0);
 	
-  if(jj == 27) {
-    ii++;
-    jj = 0;
-  }
-  set_draw(ii,jj,1);
-  jj++;
+	
+	
+	//Draws cube things
+	if(G_P==0){
+		if(dire==0 || dire==4){		//RIGHT
+			if(jj == 27) {
+				jj = 0;
+			}
+			set_draw(ii,jj,1);
+			jj++;
+			set_draw(ii-i, jj-1, 0);
+		}else if(dire==2){		//LEFT
+			if(jj == 00) {
+				jj = 27;
+				set_draw(ii-1,jj,1);
+				psleep(50);
+				set_draw(ii-1,jj,0);
+			}else
+			set_draw(ii,jj,1);
+			jj--;
+			set_draw(ii+i, jj+1, 0);
+		}else if(dire==1){	//DOWN
+			if(ii == 28) {
+				ii = 0;
+			}
+			set_draw(ii,jj,1);
+			ii++;
+			set_draw(ii-1, jj-j, 0);
+		}else if(dire ==3){		//UP
+			if(ii == 00) {
+				ii = 28;
+			}
+			set_draw(ii,jj,1);
+
+			ii--;
+			set_draw(ii+1, jj+j, 0);
+		}
+
+	}		if(G_LastX==ii && G_LastY==jj){
+			updateScore(G_Score+10);
+			G_Score+=10;
+			G_LastX=0;
+			drawFruit();
+		}
 }
 
 /* 
@@ -190,13 +241,18 @@ void updateScore(int scoreInt){
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Tom's 1");
+  //text_layer_set_text(s_output_layer, "Tom's 1");
+	dire -= 1;
+	if(dire<0){
+		dire=3;
+	}
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if(G_P==0){
-		text_layer_set_text(s_output_layer, "PAUSE");
-		G_P = 1;
+	
+	if(G_P==0){
+			text_layer_set_text(s_output_layer, "PAUSE");
+		G_P = 1;		
 	}else{
 		text_layer_set_text(s_output_layer, "");
 		G_P = 0;
@@ -205,7 +261,11 @@ static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_output_layer, "Tom's 2");
+  //text_layer_set_text(s_output_layer, "Tom's 2");
+	dire += 1;
+	if(dire>4){
+		dire=1;
+	}
 }
 
 static void click_config_provider(void *context) {
@@ -220,11 +280,7 @@ static void main_window_load(Window *window) {
   GRect window_bounds = layer_get_bounds(window_layer);
 	
 // Create output TextLayer
-  s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
-  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_text(s_output_layer, "");
-  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
-  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+  
 	//layer_remove_from_parent(text_layer_get_layer(s_output_layer));		//Removes pause text
 	
   // Create Layer
@@ -246,7 +302,7 @@ static void main_window_unload(Window *window) {
 
 static void timer_handler(void *context) {
    layer_mark_dirty(s_canvas_layer);
-   app_timer_register(200, timer_handler, NULL);
+   app_timer_register(150, timer_handler, NULL);
 }
 
 static void init() {
@@ -256,8 +312,17 @@ static void init() {
   window_set_click_config_provider(s_main_window, click_config_provider);
   s_canvas_layer = layer_create(GRect(0,0,144,168));
   window_stack_push(s_main_window, false);
+	
+	Layer *window_layer = window_get_root_layer(s_main_window);
+	s_output_layer = text_layer_create(GRect(0, 65, 141, 151));
+  text_layer_set_font(s_output_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_text(s_output_layer, "");
+  text_layer_set_overflow_mode(s_output_layer, GTextOverflowModeWordWrap);
+  layer_add_child(window_layer, text_layer_get_layer(s_output_layer));	//Adds pause text
+	
   Layer* motherLayer = window_get_root_layer(s_main_window);
   layer_add_child(motherLayer, s_canvas_layer);
+
 
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
@@ -265,7 +330,7 @@ static void init() {
   });
   
   layer_set_update_proc(s_canvas_layer, updateGame);
-  app_timer_register(200, timer_handler, NULL);
+  app_timer_register(150, timer_handler, NULL);
   
 }
 
