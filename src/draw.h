@@ -105,7 +105,7 @@ void drawFruit(){
 	int x,y =0;
 	rndPosition(&x, &y);
 	
-	draw(x,y,2);
+	set_draw(x,y,2);
 }
 
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
