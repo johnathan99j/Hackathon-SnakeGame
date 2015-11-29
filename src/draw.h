@@ -9,6 +9,8 @@
 #define ROW 28
 #define COL 27
 
+GContext *G_ctx;
+
 short state[ROW][COL];
 
 void reset() {
@@ -22,10 +24,12 @@ void reset() {
 static Window *s_main_window;
 static Layer *s_canvas_layer;
 
-void updateScore(GContext *ctx, int score);
+void updateScore(int score);
 
 static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(this_layer);
+	
+	G_ctx = ctx;
 
   // Get the center of the screen (non full-screen)
   GPoint center = GPoint(bounds.size.w / 2, (bounds.size.h / 2));
@@ -63,7 +67,7 @@ static void canvas_update_proc(Layer *this_layer, GContext *ctx) {
   }
 	
 	//Draws score text
-	updateScore(ctx, 123456789);  
+	updateScore(123456789);  
 }
 
 char *itoa(int num){
@@ -86,13 +90,13 @@ char *itoa(int num){
 	return string;
 }
 
-void updateScore(GContext *ctx, int scoreInt){
+void updateScore(int scoreInt){
 	char scoreStr[32];
 	char Int2Str[20];
 	strcpy(Int2Str,itoa(scoreInt));
 	strcpy(scoreStr,"Score: ");
 	strcat(scoreStr, Int2Str);
-	graphics_draw_text(ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+	graphics_draw_text(G_ctx, scoreStr, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD), GRect(1, 0, 141, 21), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
 }
 
 static void main_window_load(Window *window) {
